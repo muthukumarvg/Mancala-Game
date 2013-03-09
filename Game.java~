@@ -1,0 +1,210 @@
+/**
+FILENAME: Board.java 
+WHAT: Defines a class,Game, to store information about the
+ Mancala board
+@author Sydney Steward and Polina Soshnin
+*/
+
+import java.util.*;
+
+public class Game {
+    /**
+       Description of instance variables
+       player1: boolean that denotes whether player1 or player2 is allowed 
+       to click on a certain pile on the board
+       turn1: boolean denoting whose turn it is
+    */
+    public LinkedList<Pile> piles;
+    private boolean player1;
+    private boolean isLandedMancala;
+
+   
+    /**
+       Constructs a Board with a 12 piles and 2 mancalas in a linked list.
+       The 12 piles are populated with 4 pebbles each.
+    */
+    public Game() {
+      //add to our linkedlist
+      
+piles= new LinkedList<Pile>();
+piles.add(new Pile(4));
+piles.add(new Pile(4));
+piles.add(new Pile(4));
+piles.add(new Pile(4));
+piles.add(new Pile(4));
+piles.add(new Pile(4));
+piles.add(new Pile(0));
+piles.get(6).toggleMancala(); //this pile becomes a mancala
+piles.add(new Pile(4));
+piles.add(new Pile(4));
+piles.add(new Pile(4));
+piles.add(new Pile(4));
+piles.add(new Pile(4));
+piles.add(new Pile(4));
+piles.add(new Pile(0));
+piles.get(13).toggleMancala(); //this pile becomes a mancala
+isLandedMancala=false;
+    }
+    
+    /**
+       Determines whether the game has reached its end, by using 
+       isSideEmpty to check the state of each side of the board
+    */
+    public boolean isGameOver() {
+ return isSideEmpty();
+    }
+
+    /**
+       Determines whether a side of the board is empty
+    */
+    public boolean isSideEmpty() {
+      //one of two cases needs to be true:
+      //either 0-5 are empty or 7-12 are empty
+      if (isBottomSideEmpty()||isTopSideEmpty()){
+        return true;
+      } else{
+ return false;
+    }
+    }
+    
+    //checks if labels 0-5 are empty 
+      public boolean isBottomSideEmpty() {
+        int counter=0;
+        for (int i=0; i<6; i++){
+          if(piles.get(i).isEmpty()){
+                     counter++;
+          } }
+       return (counter==6); //is empty is all 6 are empty 
+      }
+      
+       //checks if labels 7-12 are empty 
+      public boolean isTopSideEmpty() {
+        int counter=0;
+        for (int i=7; i<13; i++){
+          if(piles.get(i).isEmpty()){
+                     counter++;
+          } }
+       return (counter==6); //is empty is all 6 are empty 
+      }
+      
+    /**
+       Takes a turn by distributing the contents of a chosen
+       pile across the other piles on the board. Traverses the
+       linked list, popping from the pile given as a parameter 
+       and pushing the popped pebble onto the currrent pile.
+    */
+      //I think the parameter should be a number corresponding to it's place 
+      //in the linkedlist 
+    public void makeSingleMove(Integer currentPile, Boolean player1 ) {
+     //sets isLandedMancala to false just in case
+      isLandedMancala=false;
+//I want to take the pile at piles.get(currentPile) and dump it 
+      //into all of the corresponding piles 
+      //if player1==true, dump it into mancala 6
+      //if player1==false, dump it into mancala 13
+      //now I need to add pebbles to all of the rest piles
+      
+      while(!piles.get(currentPile).isEmpty()){
+      for(int i=currentPile; ; i++){ 
+        //now, need to check if it's the person's mancala or not 
+        
+        //we need a TON of conditionals for these guys, I'm just getting started...
+        if((player1==true)&&(i==6)){
+          piles.get(6).addPebble(); //adds pebble to player 1's mancala
+          if(piles.get(currentPile).checkIfLastPebble()==true){
+            isLandedMancala=true;    
+          }
+            //we want player1 to go again 
+          piles.get(currentPile).removePebble(); //need to take into consideration if it's 
+          //the last one that landed in it 
+        } else if ((player1==false)&&(i==12)){
+          piles.get(12).addPebble(); //adds pebble to player 2's mancala
+         piles.get(currentPile).removePebble();
+          //if the pebble is dropped into an empty pile, 
+        } else if ((player1==true && i==12) || (player1==false && i==6)) {
+          //do nothing
+        } else if (piles.get(currentPile).checkIfLastPebble()==true &&
+        piles.get(i).isEmpty() && isAcrossFull(i) && isOnYourSide(i)) {
+         piles.get(currentPile).removePebble();
+         if (player1==true) {
+           piles.get(6).addPebble();
+         } else {
+           piles.get(13).addPebble();
+         }
+        //fill more stuff in...
+         allotPebbles(i);
+
+        } else {
+         piles.get(currentPile).removePebble();
+        
+         if (!piles.get(i).isEmpty()) {
+            piles.get(i).addPebble();
+         } else {
+           piles.get(i).addPebble();
+           piles.get(i).peek().toggleLastTrue();
+        }
+        }
+        if (i==13) {
+          i=0;
+        }
+      }
+    }
+      if (isLandedMancala==false) {
+        if (player1==true) {
+          player1=false;
+        } else {
+         player1=true; 
+        }
+      }
+    }
+    
+    public boolean isOnYourSide(Integer nationWide) {
+      if (player1==true && nationWide<=5) {
+        return true;
+      } else if (player1==false && nationWide>5) {
+        return true;
+      } else {
+       return false; 
+      }
+    }
+
+    /**
+       During a move, checks whether the last pebble to be
+       distributed landed in an empty pile with pebbles
+       across from it. Will call findAcross() method in order
+       to find the Pile to check.
+     */
+    public boolean isAcrossFull(Integer thisOne) {
+     Integer pileAcross= 12-thisOne; //BAM
+     if (piles.get(pileAcross).isEmpty()) {
+       return false;
+     } else {
+       return true;
+     }
+    }
+
+
+    /**
+       Redistributes pebbles from a given pile to the mancala of
+       the current player.
+    */
+    public void allotPebbles(Integer i) {
+      while (!piles.get(12-i).isEmpty()) {
+        if (player1==true) {
+          piles.get(12-i).removePebble(); 
+          piles.get(6).addPebble();
+        } else {
+          piles.get(12-i).removePebble(); 
+          piles.get(13).addPebble();
+        }
+      }
+    }
+
+    /**
+       Main method to test Board class instance methods.
+    */
+    public static void main(String[] args) {
+ Game aGame = new Game();
+ 
+    }
+}

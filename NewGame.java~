@@ -1,0 +1,788 @@
+/**
+ FILENAME: Board.java 
+ WHAT: Defines a class,Game, to store information about the
+ Mancala board
+ @author Sydney Steward and Polina Soshnin
+ */
+
+
+import java.io.*;    
+import java.util.*;  
+import java.net.*; 
+import java.applet.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class NewGame extends JApplet implements ActionListener{
+  
+  /**
+   Board Class Instance Variables
+   */
+  public LinkedList<String> gameList; //manacala board of piles
+  public JLabel[] pileLabelArray; //labels for the GUI display
+  public JLabel gameStatus, whoWon, player1Score, player2Score, winner; //status of game (who's turn it is)
+  public JButton startButton, rulesButton;
+  public JButton quitButton;
+  public JButton[] pileJButtons; //buttons for the piles/mancala 
+  public JPanel buttonPanel; //panels for the GUI display
+  public JTabbedPane rulePane; //tab to display rules 
+  public JPanel tabPanel;
+  public JPanel p1, p2, p3, p4, p5, p6, p7, p8, p9, p10;
+  public JPanel borderPanel;
+  public JPanel picPanel; //panel that contains image
+  public JLabel picLabel; //label for image 
+  public ImageIcon redApp, one, two, three, four, five, six, seven, eight, nine; //test image 
+  public ImageIcon[] pileImages;
+  public ImageIcon[] mancalaImages;
+  
+  //END BOARD INSTANCE VARIABLES
+  
+  
+  /**
+   * Description of instance variables
+   player1: boolean that denotes whether player1 or player2 is allowed 
+   to click on a certain pile on the board
+   turn1: boolean denoting whose turn it is
+   * */
+  public LinkedList<Pile> piles;
+  private boolean player1;
+  private boolean isLandedMancala;
+  //public Board aBoard;
+  
+  
+  /**
+   Constructs a Board with a 12 piles and 2 mancalas in a linked list.
+   The 12 piles are populated with 4 pebbles each.
+   */
+  public NewGame() {
+    //add to our linkedlist
+    //aBoard= new Board();
+
+    player1=true; //sets player1 to have the first turn
+    piles = new LinkedList<Pile>(); //creates a new list of piles
+    //fills one side of piles LinkedList with 6 piles (4 pebbles each)
+    for(int i=0;i<6;i++) { 
+      piles.add(new Pile(4));
+    }
+    //creates mancala pile
+    piles.add(new Pile(0));
+    //fills remaining side of piles LinkedList with 6 piles (4 pebbles each)
+    for(int j=0;j<6;j++) {
+      piles.add(new Pile(4));
+    }
+    //creates remaining mancala pile
+    piles.get(6).toggleMancala(); //this pile becomes a mancala
+    piles.add(new Pile(0));
+    piles.get(13).toggleMancala(); //this pile becomes a mancala
+    isLandedMancala=false; 
+    
+//BOARD CONSTRUCTOR
+    pileImages= new ImageIcon[20];
+    //int i = 4;
+    //populates the pileImages array
+    pileImages[0]= new ImageIcon("0.jpg");
+    for(int i=1; i<=19; i++){
+      pileImages[i]= new ImageIcon(i+".gif");
+    }
+    mancalaImages= new ImageIcon[50];
+    
+    mancalaImages[0]= new ImageIcon("2.jpg");
+    
+    //populates the mancalaImages array
+    for(int i=1; i<=36; i++){
+      mancalaImages[i]= new ImageIcon("m"+i+".gif");
+    }
+   
+    makeLabels();
+    makeButtons();
+    //pileJButtons[0].setIcon(pileImages[9]); 
+    makePanels();
+    redApp= new ImageIcon("test.jpg");
+  }
+  
+  /**
+   * To string method
+   * @return A String representing the piles linked list
+   * */
+  public String toString(){
+    return piles.toString();  
+  }
+  
+  /**
+   Determines whether the game has reached its end, by using 
+   isSideEmpty to check the state of each side of the board
+   @return boolean 
+   */
+  public boolean isGameOver() {
+    return isSideEmpty();
+  }
+  
+  /**
+   Determines whether a side of the board is empty
+   */
+  public boolean isSideEmpty() {
+    //one of two cases needs to be true:
+    //either 0-5 are empty or 7-12 are empty
+    if (isBottomSideEmpty()||isTopSideEmpty()){
+      return true;
+    } else{
+      return false;
+    }
+  }
+  
+  /**
+   * checks if piles 0-5 are empty 
+  */
+  public boolean isBottomSideEmpty() {
+    int counter=0;  
+    for (int i=0; i<6; i++){
+      if(piles.get(i).isEmpty()){
+        counter++;
+      } 
+    }
+    return (counter==6); //is empty is all 6 are empty 
+  }
+  
+  /**checks if piles 7-12 are empty 
+    * */
+  public boolean isTopSideEmpty() {
+    int counter=0;
+    for (int i=7; i<13; i++){
+      if(piles.get(i).isEmpty()){
+        counter++;
+      } }
+    return (counter==6); //is empty is all 6 are empty 
+  }
+  
+  /**
+   Takes a turn by distributing the contents of a chosen
+   pile across the other piles on the board. Traverses the
+   linked list, popping from the pile given as a parameter 
+   and pushing the popped pebble onto the currrent pile.
+   @param number of the pile that corresponds to its place in the linked list
+   */
+  public void makeSingleMove(Integer currentPile) {
+    //sets isLandedMancala to false just in case
+    if(piles.get(currentPile).isEmpty()){
+      //do nothing 
+    }
+    else if((player1==false && currentPile<6)||(player1==true && currentPile>6)){
+      //do nothing
+    } else{ 
+      isLandedMancala=false;
+      int i=currentPile;
+      //I want to take the pile at piles.get(currentPile) and dump it 
+      //into all of the corresponding piles 
+      //if player1==true, dump it into mancala 6
+      //if player1==false, dump it into mancala 13
+      //now I need to add pebbles to all of the rest piles
+      i++; //increment to get to next pile 
+      while(!piles.get(currentPile).isEmpty()){
+        if((player1==true)&&(i==6)){
+          piles.get(6).addPebble(); //adds pebble to player 1's mancala
+          
+          //UPDATE GUI HERE 
+          updateImage(6); //updates the image 
+          
+          if(piles.get(currentPile).checkIfLastPebble()==true){
+            isLandedMancala=true;    
+          }
+          //we want player1 to go again 
+          piles.get(currentPile).removePebble(); //need to take into consideration if it's 
+          updateImage(currentPile);
+          //the last one that landed in it 
+          i++;
+        } else if ((player1==false)&&(i==13)){
+          piles.get(13).addPebble(); //adds pebble to player 2's mancala
+          updateImage(13);
+          if(piles.get(currentPile).checkIfLastPebble()==true){
+            isLandedMancala=true;    
+          }
+          piles.get(currentPile).removePebble();
+          updateImage(currentPile);
+          //if the pebble is dropped into an empty pile,
+          i++;
+        } else if ((player1==true && i==13) || (player1==false && i==6)) {
+          //do nothing
+          i++;
+        } else if (piles.get(currentPile).checkIfLastPebble()==true &&
+                   piles.get(i).isEmpty() && isAcrossFull(i) && isOnYourSide(i)) {
+          piles.get(currentPile).removePebble();
+          updateImage(currentPile);
+          if (player1==true) {
+            piles.get(6).addPebble();
+            updateImage(6);
+          } else {
+            piles.get(13).addPebble();
+            updateImage(13);
+          }
+          //fill more stuff in...
+          allotPebbles(i);
+          //do not need to update i
+        } else {
+          piles.get(currentPile).removePebble();
+          updateImage(currentPile);
+          
+          if (!piles.get(i).isEmpty()) {
+            piles.get(i).addPebble();
+            updateImage(i);
+          } else {
+            piles.get(i).addPebble();
+            updateImage(i);
+            piles.get(i).peek().toggleLastTrue();
+          }
+          i++;
+        }
+        if (i==14) {
+          i=0;
+        }
+        
+      }
+      if (isLandedMancala==false) {
+        if (player1==true) {
+          player1=false;
+          gameStatus.setText("Player 2's Turn!");
+        } else {
+          player1=true; 
+          gameStatus.setText("Player 1's Turn!");
+        }
+      }
+    }
+  }
+  //Parses the description of the gif, updates the number, then finds the gif matching that number
+  //and resets the icon
+  public void updateImage(Integer i){
+    //first we want to get the number of pebbles in the pile
+    
+    Integer numPebbles= piles.get(i).getNumPebbles();
+    
+    //if it's not a mancala pile, update the pile buttons
+    if (i==6){
+      pileLabelArray[6].setIcon(mancalaImages[numPebbles]); //this needs to set icon from mancalaImages[]
+    } else if (i==13){
+      pileLabelArray[13].setIcon(mancalaImages[numPebbles]); //this needs to set icon from mancalaImages[]
+    } else {
+      //then, we want to find the image that matches the number of pebbles
+      pileJButtons[i].setIcon(pileImages[numPebbles]);
+      //then we want to reset that image to button i
+      
+      //if it's a mancala, update the mancala
+    }
+  }
+  
+  /**
+   * Checks whether the pile that has been clicked on is actually on the current players side
+   * @param 
+   * */
+  public boolean isOnYourSide(Integer nationWide) {
+    if (player1==true && nationWide<=5) {
+      return true;
+    } else if (player1==false && nationWide>5) {
+      return true;
+    } else {
+      return false; 
+    }
+  }
+  
+  /**
+   During a move, checks whether the last pebble to be
+   distributed landed in an empty pile with pebbles
+   across from it. Will call findAcross() method in order
+   to find the Pile to check.
+   */
+  public boolean isAcrossFull(Integer thisOne) {
+    Integer pileAcross= 12-thisOne; //BAM
+    if (piles.get(pileAcross).isEmpty()) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  
+  
+  /**
+   Redistributes pebbles from a given pile to the mancala of
+   the current player.
+   */
+  public void allotPebbles(Integer i) {
+    while (!piles.get(12-i).isEmpty()) {
+      if (player1==true) {
+        piles.get(12-i).removePebble(); 
+        updateImage(12-i);
+        piles.get(6).addPebble();
+        updateImage(6);
+      } else {
+        piles.get(12-i).removePebble(); 
+        updateImage(12-i);
+        piles.get(13).addPebble();
+        updateImage(13);
+      }
+    }
+  }
+  
+  //initialize GUI display to start a new game
+  //all piles will automatically have 4 pieces in them
+  /**
+   *Calls constructor in Game class to 
+   *initialize a Game that will populate 
+   */
+  public void startNewGame(){
+    
+    
+   
+     player1=true;
+    piles.clear(); 
+    for(int i=0;i<6;i++) {
+      piles.add(new Pile(4));
+    }
+    piles.add(new Pile(0));//first mancala 
+    
+    for(int j=0;j<6;j++) {
+      piles.add(new Pile(4));
+    }
+    piles.get(6).toggleMancala(); //this pile becomes a mancala
+    piles.add(new Pile(0));
+    piles.get(13).toggleMancala(); //this pile becomes a mancala
+    isLandedMancala=false;
+    
+    //reset all of the piles to 4 pebbles
+    for(int i=0; i<14; i++){
+      pileJButtons[i].setIcon(pileImages[4]);
+    }
+    player1=true; //reset to player1's turn
+    
+    pileLabelArray[6].setIcon(mancalaImages[0]);//reset the mancalas to empty 
+    pileLabelArray[13].setIcon(mancalaImages[0]);
+    gameStatus.setText("Player 1's Turn!");
+    whoWon.setText("");
+    winner.setText("");
+    player1Score.setText("");
+    player2Score.setText("");
+    
+  }
+  
+  public void determineWinner(){
+    Integer player1Mancala= piles.get(6).getNumPebbles();
+    Integer player2Mancala= piles.get(13).getNumPebbles();
+    whoWon.setText("Game is Over!");
+    gameStatus.setText("");
+    player1Score.setText("Player 1 Score:"+player1Mancala);
+    player2Score.setText("Player 2 Score:"+player2Mancala);
+    if(player1Mancala>player2Mancala){
+      winner.setText("Player 1 won!");
+    } else if(player1Mancala==player2Mancala) {
+      winner.setText("It is a tie!");
+    } else {
+      winner.setText("Player 2 won!");
+    }
+    
+    
+  }
+  public void actionPerformed(ActionEvent event){
+    //handles events generated by Button clicks
+    Object source= event.getSource();
+    if(isGameOver()){
+     determineWinner();
+    }
+    if(source.equals(startButton)){
+      // aBoard.pileLabelArray[0].setIcon(aBoard.pileImages[6]);
+      // validate();
+      // repaint();
+      startNewGame();
+      //updateImage(6);
+    }else if (source.equals(quitButton)){
+      System.exit(0);
+      //can I make the rest of them into a for loop?
+    } else if (source.equals(rulesButton)){
+      
+      JOptionPane j= new JOptionPane();
+      j.showMessageDialog(null, new ImageIcon("rulesPic.gif"));
+    }
+      
+    
+    else {
+      for (int i=0;i<13;i++) {
+        if (source.equals(pileJButtons[i])){
+      makeSingleMove(i);
+      // piles.get(0).addPebble();
+      //updateImage(0);
+      //pileJButtons[0].repaint();
+      //pileJButtons[0].setIcon(pileImages[9]); 
+      /**  pileJButtons[0].revalidate();
+        pileJButtons[0].repaint();
+        pileJButtons[1].revalidate();
+        pileJButtons[1].repaint();
+        pileJButtons[2].revalidate();
+        pileJButtons[2].repaint();
+        pileJButtons[3].revalidate();
+        pileJButtons[3].repaint();*/
+        }
+      }
+    } 
+    
+  
+//    } else if (source.equals(pileJButtons[1])){
+//      makeSingleMove(1);
+//      // revalidate();
+//      //repaint();
+//    } else if (source.equals(pileJButtons[2])){
+//      makeSingleMove(2);
+//      //revalidate();
+//      // repaint();
+//    } else if (source.equals(pileJButtons[3])){
+//      makeSingleMove(3);
+//      //revalidate();
+//      //repaint();
+//    } else if (source.equals(pileJButtons[4])){
+//      makeSingleMove(4);
+//      // revalidate();
+//      //repaint();
+//    } else if (source.equals(pileJButtons[5])){
+//      makeSingleMove(5);
+//      // revalidate();
+//      //repaint();
+//    } else if (source.equals(pileJButtons[7])){
+//      makeSingleMove(7);
+//      // revalidate();
+//      //repaint();
+//    } else if (source.equals(pileJButtons[8])){
+//      makeSingleMove(8);
+//      // revalidate();
+//      // repaint();
+//    } else if (source.equals(pileJButtons[9])){
+//      makeSingleMove(9);
+//      //revalidate();
+//      //repaint();
+//    } else if (source.equals(pileJButtons[10])){
+//      makeSingleMove(10);
+//      // revalidate();
+//      // repaint();
+//    } else if (source.equals(pileJButtons[11])){
+//      makeSingleMove(11);
+//      // revalidate();
+//      // repaint();
+//    } else if (source.equals(pileJButtons[12])){
+//      makeSingleMove(12);
+//      //revalidate();
+//      // repaint();
+//    }
+  }
+  
+  public void init() {
+    
+    //adds panels to the Applet display
+    setLayout(new GridLayout(1,5,8,4));
+    //add JPanels here;
+    //setLayout(new BorderLayout(4,4));
+    //add(p1, BorderLayout.WEST);
+    //add(borderPanel);
+    add(p9);
+    add(p1);
+    add(p2);
+    add(p3);
+    add(p4);
+    add(p5);
+    add(p6);
+    add(p7);
+    add(p8);
+    add(p10);
+    
+    //add(buttonPanel);
+    //add(rulePane);
+//add the rest of the JPanels 
+  }
+  
+  private static void createAndShowGUI(){
+    
+    //enable window decorations
+    JFrame.setDefaultLookAndFeelDecorated(true);
+    
+    //Create and set up the window
+    JFrame frame = new JFrame("Mancala Board Game");
+    
+    frame.setSize(1150, 525);
+    
+    //specify that the close button exits the application
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    
+    NewGame aGame= new NewGame();
+    aGame.init();
+    
+    frame.add(aGame, BorderLayout.CENTER);
+    
+    //Display the window
+    frame.setVisible(true);
+  }
+  
+  //START BOARD METHODS
+  public void makeTabs(){
+    rulePane= new JTabbedPane();
+    //rulePane.addChangeListener(this);
+    JComponent panel1= makeTextPanel("The rules go here");
+    JComponent panel2= makeTextPanel("The game goes here");
+    
+    rulePane.setTabComponentAt(0, new JLabel("Rules"));
+    rulePane.addTab("Rules", panel1);
+    rulePane.addTab("Game", panel2);
+    
+    //add(rulePane);
+    
+    
+    //I want to add the tabbed pane 
+    //add(rulePane);
+  }
+  
+  /**
+   *Method to create text panel to display game rules
+   */
+  
+  public JComponent makeTextPanel(String text){
+    JPanel panel= new JPanel(false);
+    JLabel filler= new JLabel(text);
+    filler.setHorizontalAlignment(JLabel.CENTER);
+    panel.setLayout(new GridLayout(1,1));
+    panel.add(filler);
+    return panel;
+    
+  }
+  
+  /**
+   *Method to create an array to store the manacala board 
+   *labels that appear on the GUI display
+   *(is this the best way to organize all of the labels?)
+   */
+  
+  public void makeLabels() {
+    //Use the piles linkedlist from the Game class
+    //to populate a label array
+    ImageIcon test1= new ImageIcon("2.jpg");
+    pileLabelArray= new JLabel[14]; //for the 14 slots in the mancala board
+    for(int i=0; i<14; i++){
+      pileLabelArray[i]= new JLabel(mancalaImages[0]);
+      pileLabelArray[i].setOpaque(true);
+      pileLabelArray[i].setBackground(Color.white);
+    }
+    gameStatus= new JLabel("Player 1's Turn!");
+    picLabel= new JLabel(redApp); //add image to this 
+  }
+  
+  /**
+   *Method to create buttons
+   */ 
+  
+  public void makeButtons(){
+    
+    pileJButtons= new JButton[14]; //for the 14 buttons on the mancala board
+    for(int i=0; i<14; i++){
+      pileJButtons[i]= new JButton(pileImages[4]); //label each button with a number for now
+      pileJButtons[i].addActionListener(this);
+    }
+//pileJButtons[0].setIcon(pileImages[9]); //test
+    JPanel test1= new JPanel();
+//test.add(picPanel);
+//ImageIcon test= new ImageIcon("Red_Apple.jpg");
+//pileJButtons[0].setIcon(test1); //add test panel, but i want to add pic panel
+    startButton= new JButton("New Game");
+    startButton.addActionListener(this);
+    quitButton= new JButton("Quit Game");
+    quitButton.addActionListener(this);
+    //instructionButton= new JButton("How to Play");
+    //instructionButton.addActionListener(this);
+    //newGameButton= new JButton("New Game");
+    //newGameButton.addActionListener(this);
+  }
+  
+  
+  
+  private JPanel makePicturePanel(JLabel i){
+    //create panel that contains the picture i in a JLabel
+    picPanel= new JPanel();
+    picPanel.add(i);
+    return picPanel;
+  }
+  
+  
+  /**
+   *Method to create panels for GUI
+   */ 
+  public void makePanels(){
+    borderPanel= new JPanel(new BorderLayout());
+    borderPanel.add(pileLabelArray[6], BorderLayout.WEST);
+    borderPanel.add(pileLabelArray[13], BorderLayout.EAST);
+    JPanel greyPanel99= new JPanel();
+    borderPanel.add(greyPanel99, BorderLayout.SOUTH);
+    
+    //tabPanel= new JPanel(); //adds tabs to one panel
+    p1= new JPanel(); 
+    //left most panel that holds first mancala
+    p1.setLayout(new GridLayout(1,1,0,0));
+    JPanel greyPanel2= new JPanel();
+    //p1.add(greyPanel2);
+    p1.add((pileLabelArray[6])); //adds left most mancala
+    //p1.add((pileJButtons[6]));
+    //p1.add(picPanel);
+    
+    
+    p2= new JPanel(); //holds 5 and 7
+    p2.setLayout(new GridLayout(2,1,4,4));
+    JPanel greyPanel1= new JPanel();
+    //p2.add(greyPanel1); //blank panel
+    
+    p2.add((pileJButtons[7]));
+    p2.add((pileJButtons[5]));
+    //p2.add((pileLabelArray[7]));
+    //p2.add((pileLabelArray[5]));
+    
+    
+    
+    p3= new JPanel(); //holds 8 and 4
+    p3.setLayout(new GridLayout(2,1,4,4));
+    JPanel greyPanel3= new JPanel();
+    
+    p3.add((pileJButtons[8]));
+    p3.add((pileJButtons[4]));
+    //p3.add((pileLabelArray[8]));
+    //p3.add((pileLabelArray[4]));
+    JPanel greyPanel4= new JPanel();
+    //p3.add(greyPanel3); //blank panel
+    //p3.add(quitButton); //blank panel
+    
+    p4= new JPanel(); //holds 9 and 3
+    p4.setLayout(new GridLayout(2,1,4,4));
+    JPanel greyPanel5= new JPanel();
+    
+    p4.add((pileJButtons[9]));
+    p4.add((pileJButtons[3]));
+//p4.add((pileLabelArray[9]));
+// p4.add((pileLabelArray[3]));
+    JPanel greyPanel6= new JPanel();
+    //p4.add(greyPanel6); //blank panel
+    //p4.add(greyPanel5); //blank panel
+    
+    p5= new JPanel(); //holds 10 and 2
+    p5.setLayout(new GridLayout(2,1,4,4));
+    JPanel greyPanel7= new JPanel();
+    
+    p5.add((pileJButtons[10]));
+    p5.add((pileJButtons[2]));
+    //p5.add((pileLabelArray[10]));
+    //p5.add((pileLabelArray[2]));
+    JPanel greyPanel8= new JPanel();
+    //p5.add(greyPanel8); //blank panel
+    //p5.add(greyPanel7); //blank panel
+    
+    p6= new JPanel(); //holds 11 and 1
+    p6.setLayout(new GridLayout(2,1,4,4));
+    JPanel greyPanel9= new JPanel();
+    
+    p6.add((pileJButtons[11]));
+    p6.add((pileJButtons[1]));
+    //p6.add((pileLabelArray[11]));
+    //p6.add((pileLabelArray[1]));
+    JPanel greyPanel10= new JPanel();
+    //p6.add(greyPanel10); //blank panel
+    //p6.add(greyPanel9); //blank panel
+    
+    p7= new JPanel(); //holds 12 and zero
+    p7.setLayout(new GridLayout(2,1,4,4));
+    JPanel greyPanel11=new JPanel();
+    
+    p7.add((pileJButtons[12]));
+    p7.add((pileJButtons[0]));
+    //p7.add(pileLabelArray[12]);
+    //p7.add(pileLabelArray[0]);
+    JPanel greyPanel12= new JPanel();
+    //p7.add(greyPanel12); //blank panel
+    //p7.add(greyPanel11); //blank panel
+    
+    
+    p8= new JPanel(); 
+    //left most panel that holds first mancala
+    p8.setLayout(new GridLayout(1,1,0,0));
+     JPanel greyPanel13= new JPanel();
+    //p8.add(greyPanel13); //blank panel
+    JPanel greyPanel98= new JPanel();
+    //p8.add(greyPanel98, BorderLayout.SOUTH);
+    p8.add((pileLabelArray[13])); //adds right most mancala
+    
+    p9= new JPanel();
+    p9.setLayout(new GridLayout(4,1,4,4));
+    rulesButton= new JButton("Rules");
+    rulesButton.addActionListener(this);
+    buttonPanel= new JPanel(); //adds my button to one panel
+    buttonPanel.setLayout(new GridLayout(2,1,4,4));
+    buttonPanel.add(startButton);
+    buttonPanel.add(quitButton);
+    //JPanel Player2= new JPanel();
+    //Player2.setText("<--Player 2");
+    JLabel Player2= new JLabel("<--Player 2");
+    Player2.setBackground(Color.white);
+   
+    p9.add(buttonPanel); //start button panel
+    JPanel rulesPanel= new JPanel();
+    rulesPanel.setLayout(new GridLayout(2,1,4,4));
+    rulesPanel.add(rulesButton);
+    rulesPanel.add(gameStatus);
+    p9.add(rulesPanel);
+    //p9.add(gameStatus);
+    p9.add(new JPanel());
+    JLabel Player1= new JLabel("Player 1-->");
+    Player1.setBackground(Color.white);
+    p9.add(Player1);
+    
+    p10= new JPanel();
+    p10.setLayout(new GridLayout(4,1,4,4));
+    p10.add(Player2);
+    //p10.add(greyPanel13);
+    whoWon= new JLabel("");
+    whoWon.setBackground(Color.white);
+    p10.add(whoWon);
+    JPanel panel9= new JPanel();
+    
+    player1Score= new JLabel("");
+    player2Score= new JLabel("");
+    winner= new JLabel("");
+    panel9.add(player1Score);
+    panel9.add(player2Score);
+    panel9.add(winner);
+    p10.add(panel9);
+    
+    
+  }
+  
+  //END BOARD METHODS
+  
+  /**
+   Main method to test Board class instance methods.
+   */
+  public static void main(String[] args) {
+    /**Game aGame = new Game();
+      System.out.println(aGame);
+      System.out.println(aGame.player1);
+      aGame.makeSingleMove(2);
+      System.out.println();
+      System.out.println(aGame);
+      System.out.println(aGame.player1);*/
+    /**System.out.println(aGame.isGameOver());
+      System.out.println(aGame.isAcrossFull(5));
+      aGame.piles.get(7).clearPile();
+      aGame.piles.get(8).clearPile();
+      aGame.piles.get(9).clearPile();
+      aGame.piles.get(10).clearPile();
+      aGame.piles.get(11).clearPile();
+      aGame.piles.get(12).clearPile();
+      System.out.println(aGame);
+      System.out.println(aGame.isBottomSideEmpty());
+      System.out.println(aGame.isTopSideEmpty());
+      //System.out.println(aGame);
+      System.out.println(aGame.isAcrossFull(0));
+      System.out.println(aGame.isGameOver());*/
+    
+    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        createAndShowGUI();
+      }
+    });
+  }
+} 
