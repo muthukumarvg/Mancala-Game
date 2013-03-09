@@ -5,6 +5,7 @@
  @author Sydney Steward and Polina Soshnin
  */
 
+//CHANGING THIS TO SEE HOW GITHUB RECOGNIZES CHANGES :) currently trying to learn github
 
 import java.io.*;    
 import java.util.*;  

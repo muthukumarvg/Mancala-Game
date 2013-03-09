@@ -36,9 +36,6 @@ public class NewGame extends JApplet implements ActionListener{
   public ImageIcon[] pileImages;
   public ImageIcon[] mancalaImages;
   
-  //END BOARD INSTANCE VARIABLES
-  
-  
   /**
    * Description of instance variables
    player1: boolean that denotes whether player1 or player2 is allowed 
@@ -56,8 +53,7 @@ public class NewGame extends JApplet implements ActionListener{
    The 12 piles are populated with 4 pebbles each.
    */
   public NewGame() {
-    //add to our linkedlist
-    //aBoard= new Board();
+ 
 
     player1=true; //sets player1 to have the first turn
     piles = new LinkedList<Pile>(); //creates a new list of piles
@@ -79,7 +75,7 @@ public class NewGame extends JApplet implements ActionListener{
     
 //BOARD CONSTRUCTOR
     pileImages= new ImageIcon[20];
-    //int i = 4;
+    
     //populates the pileImages array
     pileImages[0]= new ImageIcon("0.jpg");
     for(int i=1; i<=19; i++){
@@ -94,11 +90,12 @@ public class NewGame extends JApplet implements ActionListener{
       mancalaImages[i]= new ImageIcon("m"+i+".gif");
     }
    
+    //class methods for the GUI
     makeLabels();
     makeButtons();
     //pileJButtons[0].setIcon(pileImages[9]); 
     makePanels();
-    redApp= new ImageIcon("test.jpg");
+    //redApp= new ImageIcon("test.jpg");
   }
   
   /**
@@ -141,7 +138,7 @@ public class NewGame extends JApplet implements ActionListener{
         counter++;
       } 
     }
-    return (counter==6); //is empty is all 6 are empty 
+    return (counter==6); //is empty if all 6 are empty 
   }
   
   /**checks if piles 7-12 are empty 
@@ -152,7 +149,7 @@ public class NewGame extends JApplet implements ActionListener{
       if(piles.get(i).isEmpty()){
         counter++;
       } }
-    return (counter==6); //is empty is all 6 are empty 
+    return (counter==6); //is empty if all 6 are empty 
   }
   
   /**
@@ -172,11 +169,6 @@ public class NewGame extends JApplet implements ActionListener{
     } else{ 
       isLandedMancala=false;
       int i=currentPile;
-      //I want to take the pile at piles.get(currentPile) and dump it 
-      //into all of the corresponding piles 
-      //if player1==true, dump it into mancala 6
-      //if player1==false, dump it into mancala 13
-      //now I need to add pebbles to all of the rest piles
       i++; //increment to get to next pile 
       while(!piles.get(currentPile).isEmpty()){
         if((player1==true)&&(i==6)){
@@ -217,7 +209,7 @@ public class NewGame extends JApplet implements ActionListener{
             piles.get(13).addPebble();
             updateImage(13);
           }
-          //fill more stuff in...
+         
           allotPebbles(i);
           //do not need to update i
         } else {
@@ -328,9 +320,7 @@ public class NewGame extends JApplet implements ActionListener{
    *initialize a Game that will populate 
    */
   public void startNewGame(){
-    
-    
-   
+     
      player1=true;
     piles.clear(); 
     for(int i=0;i<6;i++) {
@@ -386,37 +376,22 @@ public class NewGame extends JApplet implements ActionListener{
      determineWinner();
     }
     if(source.equals(startButton)){
-      // aBoard.pileLabelArray[0].setIcon(aBoard.pileImages[6]);
-      // validate();
-      // repaint();
       startNewGame();
-      //updateImage(6);
     }else if (source.equals(quitButton)){
       System.exit(0);
       //can I make the rest of them into a for loop?
     } else if (source.equals(rulesButton)){
       
+      //rules pane pops up
       JOptionPane j= new JOptionPane();
       j.showMessageDialog(null, new ImageIcon("rulesPic.gif"));
     }
-      
-    
+         
     else {
       for (int i=0;i<13;i++) {
+        //not sure if this is any better than a million if statements
         if (source.equals(pileJButtons[i])){
       makeSingleMove(i);
-      // piles.get(0).addPebble();
-      //updateImage(0);
-      //pileJButtons[0].repaint();
-      //pileJButtons[0].setIcon(pileImages[9]); 
-      /**  pileJButtons[0].revalidate();
-        pileJButtons[0].repaint();
-        pileJButtons[1].revalidate();
-        pileJButtons[1].repaint();
-        pileJButtons[2].revalidate();
-        pileJButtons[2].repaint();
-        pileJButtons[3].revalidate();
-        pileJButtons[3].repaint();*/
         }
       }
     } 
@@ -473,10 +448,7 @@ public class NewGame extends JApplet implements ActionListener{
     
     //adds panels to the Applet display
     setLayout(new GridLayout(1,5,8,4));
-    //add JPanels here;
-    //setLayout(new BorderLayout(4,4));
-    //add(p1, BorderLayout.WEST);
-    //add(borderPanel);
+ 
     add(p9);
     add(p1);
     add(p2);
@@ -488,9 +460,6 @@ public class NewGame extends JApplet implements ActionListener{
     add(p8);
     add(p10);
     
-    //add(buttonPanel);
-    //add(rulePane);
-//add the rest of the JPanels 
   }
   
   private static void createAndShowGUI(){
@@ -519,12 +488,12 @@ public class NewGame extends JApplet implements ActionListener{
   public void makeTabs(){
     rulePane= new JTabbedPane();
     //rulePane.addChangeListener(this);
-    JComponent panel1= makeTextPanel("The rules go here");
-    JComponent panel2= makeTextPanel("The game goes here");
+    //JComponent panel1= makeTextPanel("The rules go here");
+    //JComponent panel2= makeTextPanel("The game goes here");
     
-    rulePane.setTabComponentAt(0, new JLabel("Rules"));
-    rulePane.addTab("Rules", panel1);
-    rulePane.addTab("Game", panel2);
+    //rulePane.setTabComponentAt(0, new JLabel("Rules"));
+    //rulePane.addTab("Rules", panel1);
+    //rulePane.addTab("Game", panel2);
     
     //add(rulePane);
     
@@ -564,7 +533,7 @@ public class NewGame extends JApplet implements ActionListener{
       pileLabelArray[i].setBackground(Color.white);
     }
     gameStatus= new JLabel("Player 1's Turn!");
-    picLabel= new JLabel(redApp); //add image to this 
+    //picLabel= new JLabel(redApp); //add image to this 
   }
   
   /**
@@ -580,17 +549,11 @@ public class NewGame extends JApplet implements ActionListener{
     }
 //pileJButtons[0].setIcon(pileImages[9]); //test
     JPanel test1= new JPanel();
-//test.add(picPanel);
-//ImageIcon test= new ImageIcon("Red_Apple.jpg");
-//pileJButtons[0].setIcon(test1); //add test panel, but i want to add pic panel
     startButton= new JButton("New Game");
     startButton.addActionListener(this);
     quitButton= new JButton("Quit Game");
     quitButton.addActionListener(this);
-    //instructionButton= new JButton("How to Play");
-    //instructionButton.addActionListener(this);
-    //newGameButton= new JButton("New Game");
-    //newGameButton.addActionListener(this);
+
   }
   
   
@@ -607,51 +570,37 @@ public class NewGame extends JApplet implements ActionListener{
    *Method to create panels for GUI
    */ 
   public void makePanels(){
-    borderPanel= new JPanel(new BorderLayout());
+    /*borderPanel= new JPanel(new BorderLayout());
     borderPanel.add(pileLabelArray[6], BorderLayout.WEST);
     borderPanel.add(pileLabelArray[13], BorderLayout.EAST);
     JPanel greyPanel99= new JPanel();
     borderPanel.add(greyPanel99, BorderLayout.SOUTH);
-    
-    //tabPanel= new JPanel(); //adds tabs to one panel
+    */
+     //left most panel that holds first mancala
     p1= new JPanel(); 
-    //left most panel that holds first mancala
     p1.setLayout(new GridLayout(1,1,0,0));
     JPanel greyPanel2= new JPanel();
-    //p1.add(greyPanel2);
     p1.add((pileLabelArray[6])); //adds left most mancala
-    //p1.add((pileJButtons[6]));
-    //p1.add(picPanel);
     
     
     p2= new JPanel(); //holds 5 and 7
     p2.setLayout(new GridLayout(2,1,4,4));
-    JPanel greyPanel1= new JPanel();
-    //p2.add(greyPanel1); //blank panel
-    
+    JPanel greyPanel1= new JPanel();   
     p2.add((pileJButtons[7]));
     p2.add((pileJButtons[5]));
-    //p2.add((pileLabelArray[7]));
-    //p2.add((pileLabelArray[5]));
-    
-    
-    
+      
     p3= new JPanel(); //holds 8 and 4
     p3.setLayout(new GridLayout(2,1,4,4));
-    JPanel greyPanel3= new JPanel();
-    
+    //JPanel greyPanel3= new JPanel();  
     p3.add((pileJButtons[8]));
     p3.add((pileJButtons[4]));
-    //p3.add((pileLabelArray[8]));
-    //p3.add((pileLabelArray[4]));
     JPanel greyPanel4= new JPanel();
     //p3.add(greyPanel3); //blank panel
     //p3.add(quitButton); //blank panel
     
     p4= new JPanel(); //holds 9 and 3
     p4.setLayout(new GridLayout(2,1,4,4));
-    JPanel greyPanel5= new JPanel();
-    
+    JPanel greyPanel5= new JPanel();   
     p4.add((pileJButtons[9]));
     p4.add((pileJButtons[3]));
 //p4.add((pileLabelArray[9]));
@@ -757,27 +706,6 @@ public class NewGame extends JApplet implements ActionListener{
    Main method to test Board class instance methods.
    */
   public static void main(String[] args) {
-    /**Game aGame = new Game();
-      System.out.println(aGame);
-      System.out.println(aGame.player1);
-      aGame.makeSingleMove(2);
-      System.out.println();
-      System.out.println(aGame);
-      System.out.println(aGame.player1);*/
-    /**System.out.println(aGame.isGameOver());
-      System.out.println(aGame.isAcrossFull(5));
-      aGame.piles.get(7).clearPile();
-      aGame.piles.get(8).clearPile();
-      aGame.piles.get(9).clearPile();
-      aGame.piles.get(10).clearPile();
-      aGame.piles.get(11).clearPile();
-      aGame.piles.get(12).clearPile();
-      System.out.println(aGame);
-      System.out.println(aGame.isBottomSideEmpty());
-      System.out.println(aGame.isTopSideEmpty());
-      //System.out.println(aGame);
-      System.out.println(aGame.isAcrossFull(0));
-      System.out.println(aGame.isGameOver());*/
     
     javax.swing.SwingUtilities.invokeLater(new Runnable() {
       public void run() {
